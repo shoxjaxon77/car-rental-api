@@ -120,3 +120,4 @@ python manage.py runserver
 
 API documentation will be available at `/swagger/` or `/redoc/` after running the server.
 # car-rental-api
+# car-rental-api
