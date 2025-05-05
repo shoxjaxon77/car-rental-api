@@ -20,17 +20,17 @@ def register(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    email = request.data.get('email')
+    username = request.data.get('username')
     password = request.data.get('password')
     
-    user = authenticate(email=email, password=password)
+    user = authenticate(username=username, password=password)
     if user:
         return Response({
             'user': UserSerializer(user).data,
             'message': 'Muvaffaqiyatli kirdingiz'
         })
     return Response({
-        'error': 'Email yoki parol noto\'g\'ri'
+        'error': 'Username yoki parol noto\'g\'ri'
     }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
