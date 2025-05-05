@@ -23,18 +23,14 @@ class RentViewSet(viewsets.ModelViewSet):
         return Rent.objects.filter(user=self.request.user)
     
     @action(detail=True, methods=['post'])
-    def add_payment(self, request, pk=None):
+    def cancel(self, request, pk=None):
         rent = self.get_object()
         if rent.status != 'pending':
-            return Response({'error': 'To\'lov qo\'shib bo\'lmaydi'}, status=400)
+            return Response({'error': 'Faqat kutilayotgan buyurtmani bekor qilish mumkin'}, status=400)
         
-        if 'payment_image' not in request.data:
-            return Response({'error': 'To\'lov rasmi yuborilmadi'}, status=400)
-        
-        rent.payment_image = request.data['payment_image']
-        rent.status = 'paid'
+        rent.status = 'cancelled'
         rent.save()
-        return Response({'status': 'To\'lov qabul qilindi'})
+        return Response({'status': 'Buyurtma bekor qilindi'})
 
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -47,13 +43,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Order.objects.filter(rent__user=self.request.user)
     
     @action(detail=True, methods=['post'])
-    def approve_rent(self, request, pk=None):
+    def approve(self, request, pk=None):
         if not request.user.is_staff:
             return Response({'error': 'Faqat adminlar tasdiqlashi mumkin'}, status=403)
         
         rent = Rent.objects.get(pk=pk)
-        if rent.status != 'paid':
-            return Response({'error': 'Faqat to\'langan arizalarni tasdiqlash mumkin'}, status=400)
+        if rent.status != 'pending':
+            return Response({'error': 'Faqat kutilayotgan buyurtmani tasdiqlash mumkin'}, status=400)
         
         rent.status = 'approved'
         rent.save()
@@ -65,4 +61,4 @@ class OrderViewSet(viewsets.ModelViewSet):
         rent.car.available = False
         rent.car.save()
         
-        return Response({'status': 'Ariza tasdiqlandi'})
+        return Response({'status': 'Buyurtma tasdiqlandi'})
