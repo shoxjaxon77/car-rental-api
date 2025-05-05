@@ -1,17 +1,20 @@
 from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Car, Rent, Order
-from .serializers import CarSerializer, RentSerializer, OrderSerializer
+from .models import Car, Rent, Order, Category
+from .serializers import CarSerializer, RentSerializer, OrderSerializer, CategorySerializer
 
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
 
 class CarViewSet(viewsets.ModelViewSet):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'brand', 'model']
-
+    search_fields = ['name', 'description']
 
 class RentViewSet(viewsets.ModelViewSet):
     serializer_class = RentSerializer
@@ -31,7 +34,6 @@ class RentViewSet(viewsets.ModelViewSet):
         rent.status = 'cancelled'
         rent.save()
         return Response({'status': 'Buyurtma bekor qilindi'})
-
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer

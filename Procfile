@@ -1,1 +1,1 @@
-web: sh build.sh
+web: gunicorn config.wsgi:application --log-file -
