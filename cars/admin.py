@@ -1,25 +1,25 @@
 from django.contrib import admin
-from .models import Car, Rent, Order, Category
+from .models import Brand, Car, Booking, Contract
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
-    search_fields = ['name']
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
 
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price_per_day', 'category', 'available']
-    list_filter = ['category', 'available']
-    search_fields = ['name', 'description']
+    list_display = ('brand', 'model', 'year', 'seats', 'color', 'price_per_day', 'total_quantity', 'available_count')
+    list_filter = ('brand', 'year', 'seats')
+    search_fields = ('brand__name', 'model')
 
-@admin.register(Rent)
-class RentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'car', 'start_date', 'end_date', 'total_price', 'status']
-    list_filter = ['status', 'start_date', 'end_date']
-    search_fields = ['user__email', 'car__name']
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'car', 'start_date', 'end_date', 'status', 'created_at')
+    list_filter = ('status', 'start_date', 'end_date')
+    search_fields = ('user__username', 'car__model')
 
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ['rent', 'created_at']
-    list_filter = ['created_at']
-    search_fields = ['rent__user__email', 'rent__car__name']
+@admin.register(Contract)
+class ContractAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'car', 'user', 'start_date', 'end_date', 'total_price', 'status')
+    list_filter = ('status', 'start_date', 'end_date')
+    search_fields = ('user__username', 'car__model')

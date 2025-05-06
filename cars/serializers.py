@@ -1,52 +1,43 @@
 from rest_framework import serializers
-from .models import Car, Rent, Order, Category
+from .models import Brand, Car, Booking, Contract
 
-class CategorySerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Category
-        fields = ['id', 'name', 'description']
+        model = Brand
+        fields = ['id', 'name']
 
 class CarSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(),
-        source='category',
-        write_only=True
-    )
+    brand_name = serializers.CharField(source='brand.name', read_only=True)
+    available_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Car
-        fields = ['id', 'name', 'description', 'price_per_day', 'image', 'category', 'category_id', 'available']
+        fields = ['id', 'brand', 'brand_name', 'model', 'year', 'seats', 'color', 
+                 'price_per_day', 'total_quantity', 'available_count', 'photo', 'description']
 
-class RentSerializer(serializers.ModelSerializer):
-    car = CarSerializer(read_only=True)
-    car_id = serializers.PrimaryKeyRelatedField(
-        queryset=Car.objects.all(),
-        source='car',
-        write_only=True
-    )
+class BookingSerializer(serializers.ModelSerializer):
+    car_details = CarSerializer(source='car', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
 
     class Meta:
-        model = Rent
-        fields = ['id', 'car', 'car_id', 'start_date', 'end_date', 'total_price', 'status']
-        read_only_fields = ['status', 'total_price']
+        model = Booking
+        fields = ['id', 'user', 'car', 'car_details', 'user_email', 'start_date', 
+                 'end_date', 'status', 'created_at']
+        read_only_fields = ['status', 'created_at']
 
-    def create(self, validated_data):
-        car = validated_data['car']
-        days = (validated_data['end_date'] - validated_data['start_date']).days + 1
-        total_price = car.price_per_day * days
-        
-        rent = Rent.objects.create(
-            user=self.context['request'].user,
-            car=car,
-            total_price=total_price,
-            **validated_data
-        )
-        return rent
+    def validate(self, data):
+        if data['start_date'] >= data['end_date']:
+            raise serializers.ValidationError("End date must be after start date")
+        return data
 
-class OrderSerializer(serializers.ModelSerializer):
-    rent = RentSerializer(read_only=True)
+class ContractSerializer(serializers.ModelSerializer):
+    booking_details = BookingSerializer(source='booking', read_only=True)
+    car_details = CarSerializer(source='car', read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
 
     class Meta:
-        model = Order
-        fields = ['id', 'rent']
+        model = Contract
+        fields = ['id', 'booking', 'booking_details', 'car', 'car_details', 
+                 'user', 'user_email', 'start_date', 'end_date', 'total_price', 
+                 'status', 'created_at']
+        read_only_fields = ['created_at']

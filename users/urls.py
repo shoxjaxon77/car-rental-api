@@ -1,9 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'users'
+
 urlpatterns = [
-    path('register/', views.register),
-    path('login/', views.login),
-    path('profile/', views.get_profile),
-    path('profile/update/', views.update_profile),
+    # User URLs will be added here
 ]

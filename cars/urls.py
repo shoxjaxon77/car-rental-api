@@ -1,12 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CarViewSet, RentViewSet, OrderViewSet, CategoryViewSet
+from . import views
+
+app_name = 'cars'
 
 router = DefaultRouter()
-router.register(r'cars', CarViewSet)
-router.register(r'rents', RentViewSet, basename='rent')
-router.register(r'orders', OrderViewSet, basename='order')
-router.register(r'car-categories', CategoryViewSet)
+router.register('brands', views.BrandViewSet)
+router.register('cars', views.CarViewSet)
+router.register('bookings', views.BookingViewSet, basename='booking')
+router.register('contracts', views.ContractViewSet, basename='contract')
 
 urlpatterns = [
     path('', include(router.urls)),

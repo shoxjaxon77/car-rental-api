@@ -1,56 +1,55 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from users.models import CustomUser
 
-User = get_user_model()
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class Brand(models.Model):
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        verbose_name_plural = 'Categories'
 
 class Car(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='cars')
+    model = models.CharField(max_length=100)
+    year = models.PositiveIntegerField()
+    seats = models.PositiveIntegerField()
+    color = models.CharField(max_length=30)
     price_per_day = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='cars/')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='cars')
-    available = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    total_quantity = models.PositiveIntegerField()
+    photo = models.ImageField(upload_to='car_photos/', blank=True, null=True)
+    description = models.TextField(blank=True)
+
+    def available_count(self):
+        active_contracts = Contract.objects.filter(car=self, status='active').count()
+        return self.total_quantity - active_contracts
 
     def __str__(self):
-        return self.name
+        return f"{self.brand.name} {self.model} ({self.year})"
 
-class Rent(models.Model):
+class Booking(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Kutilmoqda'),
-        ('approved', 'Tasdiqlangan'),
-        ('cancelled', 'Bekor qilingan'),
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
     )
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='bookings')
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='rents')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rents')
+    def __str__(self):
+        return f"Booking by {self.user.username} for {self.car} ({self.status})"
+
+class Contract(models.Model):
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=10, default='active')  # active/completed/cancelled
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.email} - {self.car.name}"
-
-class Order(models.Model):
-    rent = models.OneToOneField(Rent, on_delete=models.CASCADE, related_name='order')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Order for {self.rent}"
+        return f"Contract: {self.car} to {self.user.username}"
