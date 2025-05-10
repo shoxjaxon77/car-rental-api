@@ -63,8 +63,15 @@ class Car(models.Model):
         verbose_name_plural = 'Avtomobillar'
 
     def available_count(self):
+        # Faol shartnomalar va tasdiqlangan buyurtmalarni hisobga olish
         active_contracts = Contract.objects.filter(car=self, status='faol').count()
-        return self.total_quantity - active_contracts
+        confirmed_bookings = Booking.objects.filter(
+            car=self,
+            status='qabul_qilindi',
+            start_date__lte=timezone.now().date(),
+            end_date__gte=timezone.now().date()
+        ).count()
+        return self.total_quantity - (active_contracts + confirmed_bookings)
 
     def is_available(self):
         return self.available_count() > 0
@@ -122,8 +129,33 @@ class Booking(models.Model):
     def clean(self):
         if self.end_date < self.start_date:
             raise ValidationError("Tugash sanasi boshlanish sanasidan oldin bo'lishi mumkin emas.")
+            
         if self.start_date < timezone.now().date():
             raise ValidationError("O'tgan sana uchun buyurtma berish mumkin emas.")
+            
+        # Avtomobil mavjudligini tekshirish
+        overlapping_bookings = Booking.objects.filter(
+            car=self.car,
+            status='qabul_qilindi',
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exclude(pk=self.pk).exists()
+        
+        overlapping_contracts = Contract.objects.filter(
+            car=self.car,
+            status='faol',
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exists()
+        
+        if overlapping_bookings or overlapping_contracts:
+            raise ValidationError("Bu vaqt oralig'ida avtomobil band.")
+            
+        # Umumiy narxni hisoblash
+        duration = (self.end_date - self.start_date).days
+        if duration < 1:
+            raise ValidationError("Ijara muddati kamida 1 kun bo'lishi kerak.")
+        self.total_price = self.car.price_per_day * duration
 
     def get_duration(self):
         return (self.end_date - self.start_date).days
@@ -208,6 +240,14 @@ class Payment(models.Model):
         ]
 
     def clean(self):
+        # Buyurtma tasdiqlangan bo'lishi kerak
+        if self.booking.status != 'qabul_qilindi':
+            raise ValidationError("Faqat tasdiqlangan buyurtmalar uchun to'lov qilish mumkin.")
+            
+        # To'lov summasi buyurtma summasiga teng bo'lishi kerak
+        if self.amount and self.amount != self.booking.total_price:
+            raise ValidationError("To'lov summasi buyurtma summasiga teng bo'lishi kerak.")
+            
         # Karta raqami validatsiyasi
         if not self.card_number.isdigit() or len(self.card_number) != 16:
             raise ValidationError("Karta raqami 16 ta raqamdan iborat bo'lishi kerak")
@@ -281,6 +321,29 @@ class Contract(models.Model):
     def clean(self):
         if self.end_date < self.start_date:
             raise ValidationError("Tugash sanasi boshlanish sanasidan oldin bo'lishi mumkin emas.")
+            
+        # Avtomobil mavjudligini tekshirish
+        overlapping_contracts = Contract.objects.filter(
+            car=self.car,
+            status='faol',
+            start_date__lte=self.end_date,
+            end_date__gte=self.start_date
+        ).exclude(pk=self.pk).exists()
+        
+        if overlapping_contracts:
+            raise ValidationError("Bu vaqt oralig'ida avtomobil band.")
+            
+        # Buyurtma tasdiqlangan bo'lishi kerak
+        if self.booking.status != 'qabul_qilindi':
+            raise ValidationError("Faqat tasdiqlangan buyurtmalar uchun shartnoma tuzish mumkin.")
+            
+        # Shartnoma ma'lumotlari buyurtma ma'lumotlariga mos kelishi kerak
+        if (self.car != self.booking.car or
+            self.user != self.booking.user or
+            self.start_date != self.booking.start_date or
+            self.end_date != self.booking.end_date or
+            self.total_price != self.booking.total_price):
+            raise ValidationError("Shartnoma ma'lumotlari buyurtma ma'lumotlariga mos kelishi kerak.")
 
     def get_duration(self):
         return (self.end_date - self.start_date).days
