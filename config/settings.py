@@ -32,6 +32,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -48,6 +49,128 @@ INSTALLED_APPS = [
     'cars',
     'users',
 ]
+
+# Jazzmin Settings
+JAZZMIN_SETTINGS = {
+    # General settings
+    "site_title": "Car Rental System",
+    "site_header": "Car Rental",
+    "site_brand": "🚗 Car Rental",
+    "welcome_sign": "Welcome to Car Rental Management System",
+    "copyright": "Car Rental - All rights reserved © 2025",
+    "search_model": ["users.CustomUser", "cars.Car", "cars.Booking"],
+    "user_avatar": "avatar",
+    
+    # Top Menu Items
+    "topmenu_links": [
+        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Cars", "model": "cars.Car"},
+        {"name": "Bookings", "model": "cars.Booking"},
+        {"name": "Users", "model": "users.CustomUser"},
+        {"name": "Support", "url": "https://support.example.com", "new_window": True},
+    ],
+    
+    # Side Menu Organization
+    "show_sidebar": True,
+    "navigation_expanded": False,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": [
+        "users",
+        "cars",
+        "auth",
+    ],
+    
+    # Menu Icons
+    "icons": {
+        "auth": "fas fa-shield-alt",
+        "auth.user": "fas fa-user",
+        "users.customuser": "fas fa-user-tie",
+        "auth.Group": "fas fa-users",
+        "cars.brand": "fas fa-copyright",
+        "cars.car": "fas fa-car-side",
+        "cars.booking": "fas fa-calendar-alt",
+        "cars.contract": "fas fa-file-signature",
+    },
+    
+    # UI Customization
+    "show_ui_builder": True,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "users.customuser": "collapsible",
+        "auth.group": "vertical_tabs",
+        "cars.car": "horizontal_tabs",
+        "cars.booking": "vertical_tabs",
+    },
+    
+    # Custom Links and Actions
+    "custom_links": {
+        "cars": [{
+            "name": "Generate Report", 
+            "url": "generate_report", 
+            "icon": "fas fa-file-pdf",
+            "permissions": ["cars.view_car"]
+        }]
+    },
+    
+    # Related Modal Configuration
+    "related_modal_active": True,
+    
+    # Custom CSS/JS for additional styling
+    "custom_css": None,
+    "custom_js": None,
+    
+    # Show the admin home icon on the side menu
+    "show_apps": True,
+    
+    # Additional UI tweaks
+    "show_filters": True,
+    "navigation_expanded": True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    # Small text on the top navigation?
+    "navbar_small_text": False,
+    # Small text on the footer?
+    "footer_small_text": False,
+    # Small text everywhere?
+    "body_small_text": False,
+    # Small text on the brand/logo?
+    "brand_small_text": False,
+    # Brand/logo background colour
+    "brand_colour": "navbar-indigo",
+    # Accent colour
+    "accent": "accent-teal",
+    # Navbar colour
+    "navbar": "navbar-indigo navbar-dark",
+    # No navbar border
+    "no_navbar_border": True,
+    # Fixed layout (navbar and footer)
+    "navbar_fixed": True,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    # Sidebar themes
+    "sidebar": "sidebar-dark-indigo",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    # A list of css classes to customise the admin interface
+    "custom_css": None,
+    # Choose a dark theme
+    "theme": "flatly",
+    "dark_mode_theme": "darkly",
+    # Button classes
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success"
+    },
+    # Actions classes
+    "actions_sticky_top": True
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
