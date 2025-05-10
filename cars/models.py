@@ -62,10 +62,6 @@ class Car(models.Model):
         verbose_name = 'Avtomobil'
         verbose_name_plural = 'Avtomobillar'
 
-    def clean(self):
-        if self.end_date and self.start_date and self.end_date < self.start_date:
-            raise ValidationError("Tugash sanasi boshlanish sanasidan oldin bo'lishi mumkin emas.")
-
     def available_count(self):
         active_contracts = Contract.objects.filter(car=self, status='faol').count()
         return self.total_quantity - active_contracts
