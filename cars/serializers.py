@@ -38,59 +38,11 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         # Sanalarni tekshirish
         start_date = data['start_date']
         end_date = data['end_date']
-        today = timezone.now().date()
-
-        if start_date < today:
-            raise serializers.ValidationError({
-                'start_date': "O'tgan sana uchun buyurtma berish mumkin emas"
-            })
 
         if end_date <= start_date:
             raise serializers.ValidationError({
                 'end_date': "Tugash sanasi boshlanish sanasidan keyin bo'lishi kerak"
             })
-
-        # Buyurtma muddatini tekshirish (maksimum 30 kun)
-        duration = (end_date - start_date).days
-        if duration > 30:
-            raise serializers.ValidationError({
-                'end_date': "Buyurtma muddati 30 kundan oshmasligi kerak"
-            })
-
-        # Avtomobil mavjudligini tekshirish
-        car = data['car']
-        
-        # Parallel buyurtmalarni tekshirish
-        overlapping_bookings = Booking.objects.filter(
-            car=car,
-            status='qabul_qilindi',
-            start_date__lte=end_date,
-            end_date__gte=start_date
-        ).exists()
-
-        overlapping_contracts = Contract.objects.filter(
-            car=car,
-            status='faol',
-            start_date__lte=end_date,
-            end_date__gte=start_date
-        ).exists()
-
-        if overlapping_bookings or overlapping_contracts:
-            raise serializers.ValidationError({
-                'car': "Bu vaqt oralig'ida avtomobil band"
-            })
-
-        # Foydalanuvchining aktiv buyurtmalari sonini tekshirish
-        user = self.context['request'].user
-        active_bookings = Booking.objects.filter(
-            user=user,
-            status__in=['kutilmoqda', 'qabul_qilindi']
-        ).count()
-
-        if active_bookings >= 3:
-            raise serializers.ValidationError(
-                "Sizda 3 ta aktiv buyurtma mavjud. Yangi buyurtma berish uchun avval ularni yakunlang."
-            )
 
         return data
 
@@ -130,74 +82,13 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
         booking = data['booking']
         user = self.context['request'].user
 
-        # Booking statusini tekshirish
-        if booking.status != 'kutilmoqda':
-            raise serializers.ValidationError({
-                'booking': "Bu buyurtma uchun to'lov qilib bo'lmaydi"
-            })
-
         # Booking foydalanuvchisini tekshirish
         if booking.user != user:
             raise serializers.ValidationError({
                 'booking': "Siz faqat o'z buyurtmalaringiz uchun to'lov qila olasiz"
             })
 
-        # Buyurtma muddati o'tib ketmaganligini tekshirish
-        if booking.start_date < timezone.now().date():
-            booking.status = 'rad_etildi'
-            booking.save()
-            raise serializers.ValidationError({
-                'booking': "Buyurtma muddati o'tib ketgan"
-            })
-
-        # Karta raqami validatsiyasi (Luhn algoritmi)
-        card_number = data['card_number']
-        if not self.is_valid_card_number(card_number):
-            raise serializers.ValidationError({
-                'card_number': "Noto'g'ri karta raqami"
-            })
-
-        # Karta amal qilish muddatini tekshirish
-        try:
-            month, year = data['card_expire'].split('/')
-            month = int(month)
-            year = int('20' + year)
-            
-            if not (1 <= month <= 12):
-                raise ValueError("Noto'g'ri oy")
-                
-            expiry_date = timezone.datetime(year, month, 1).date()
-            if expiry_date < timezone.now().date():
-                raise serializers.ValidationError({
-                    'card_expire': "Karta muddati tugagan"
-                })
-        except (ValueError, IndexError):
-            raise serializers.ValidationError({
-                'card_expire': "Noto'g'ri sana formati (MM/YY)"
-            })
-
         return data
-
-    def is_valid_card_number(self, card_number):
-        """Luhn algoritmi yordamida karta raqamini tekshirish"""
-        if not card_number.isdigit() or len(card_number) != 16:
-            return False
-
-        digits = [int(d) for d in card_number]
-        checksum = 0
-        is_odd = True
-
-        for d in digits[::-1]:
-            if is_odd:
-                checksum += d
-            else:
-                d *= 2
-                if d > 9:
-                    d -= 9
-                checksum += d
-            is_odd = not is_odd
-
-        return (checksum % 10) == 0
 
     def create(self, validated_data):
         # Foydalanuvchini va summani qo'shish

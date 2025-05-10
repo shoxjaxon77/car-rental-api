@@ -51,4 +51,9 @@ urlpatterns = [
     # GET: Contract details
     # Response: Full contract info with booking and payment details
     path('api/v1/contracts/<int:pk>/', views.ContractDetailView.as_view(), name='contract-detail'),
+    
+    # POST: Create new contract (Admin only)
+    # Request: {"booking": 1}
+    # Response: {"success": true, "contract_id": 1}
+    path('api/v1/contracts/create/', views.ContractCreateView.as_view(), name='contract-create'),
 ]

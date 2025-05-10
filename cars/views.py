@@ -61,16 +61,59 @@ class BookingCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        booking = serializer.save()
-
-        # To'lov ma'lumotlarini qaytarish
-        return Response({
-            'booking_id': booking.id,
-            'total_price': booking.total_price,
-            'message': "Buyurtma yaratildi. To'lovni amalga oshiring."
-        }, status=status.HTTP_201_CREATED)
+        try:
+            # Ma'lumotlarni olish
+            car_id = request.data.get('car')
+            try:
+                start_date = timezone.datetime.strptime(request.data.get('start_date'), '%Y-%m-%d').date()
+                end_date = timezone.datetime.strptime(request.data.get('end_date'), '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                return Response({
+                    'success': False,
+                    'message': "Sana formati noto'g'ri (YYYY-MM-DD)"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Avtomobilni olish
+            car = Car.objects.get(id=car_id)
+            
+            # Buyurtmani yaratish
+            booking = Booking.objects.create(
+                car=car,
+                user=request.user,
+                start_date=start_date,
+                end_date=end_date,
+                status='kutilmoqda'
+            )
+            
+            # Kunlar sonini va umumiy summani hisoblash
+            days = (booking.end_date - booking.start_date).days
+            total_price = days * car.daily_price
+            
+            return Response({
+                'success': True,
+                'message': 'Buyurtma yaratildi',
+                'data': {
+                    'booking_id': booking.id,
+                    'car_name': car.name,
+                    'start_date': start_date,
+                    'end_date': end_date,
+                    'days': days,
+                    'daily_price': car.daily_price,
+                    'total_price': total_price
+                }
+            })
+            
+        except Car.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': 'Avtomobil topilmadi'
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class BookingListView(generics.ListAPIView):
     serializer_class = BookingListSerializer
@@ -86,59 +129,78 @@ class PaymentCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        
         try:
-            serializer.is_valid(raise_exception=True)
+            # To'lov ma'lumotlarini olish
+            booking_id = request.data.get('booking')
+            card_number = request.data.get('card_number', '')
+            card_expire = request.data.get('card_expire', '')
             
-            # Tranzaksiyani boshlash
-            with transaction.atomic():
-                # To'lovni amalga oshirish
-                payment = serializer.save(user=request.user)
-                
-                # Shartnoma yaratish
-                booking = payment.booking
-                contract = Contract.objects.create(
-                    booking=booking,
-                    car=booking.car,
-                    user=booking.user,
-                    start_date=booking.start_date,
-                    end_date=booking.end_date,
-                    total_price=booking.total_price,
-                    status='faol'
-                )
-                
-                # To'lov muvaffaqiyatli bo'lsa
-                response_serializer = PaymentDetailSerializer(payment)
+            # Karta raqamini tekshirish
+            if not card_number.isdigit() or len(card_number) != 16:
                 return Response({
-                    'success': True,
-                    'message': "To'lov muvaffaqiyatli amalga oshirildi",
-                    'data': {
-                        'payment': response_serializer.data,
-                        'contract_id': contract.id
-                    }
-                }, status=status.HTTP_201_CREATED)
-                
-        except serializers.ValidationError as e:
-            return Response({
-                'success': False,
-                'message': "Validatsiya xatosi",
-                'errors': e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+                    'success': False,
+                    'message': "Karta raqami 16 ta raqamdan iborat bo'lishi kerak"
+                }, status=status.HTTP_400_BAD_REQUEST)
             
-        except IntegrityError:
+            # Karta muddatini tekshirish
+            if not card_expire or len(card_expire) != 5:
+                return Response({
+                    'success': False,
+                    'message': "Karta muddati MM/YY formatida bo'lishi kerak"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            try:
+                month, year = card_expire.split('/')
+                if not (1 <= int(month) <= 12 and len(year) == 2):
+                    raise ValueError
+            except ValueError:
+                return Response({
+                    'success': False,
+                    'message': "Karta muddati noto'g'ri"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Buyurtmani olish
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+            
+            # To'lov summasini hisoblash
+            days = (booking.end_date - booking.start_date).days
+            total_price = days * booking.car.daily_price
+            
+            # To'lovni saqlash
+            payment = Payment.objects.create(
+                booking=booking,
+                user=request.user,
+                amount=total_price,
+                card_number=card_number,
+                card_expire=card_expire,
+                status='kutilmoqda'
+            )
+            
+            # Buyurtma statusini yangilash
+            booking.status = 'kutilmoqda'
+            booking.save()
+            
+            return Response({
+                'success': True,
+                'message': "To'lov muvaffaqiyatli amalga oshirildi",
+                'data': {
+                    'payment_id': payment.id,
+                    'amount': total_price,
+                    'status': 'kutilmoqda'
+                }
+            })
+            
+        except Booking.DoesNotExist:
             return Response({
                 'success': False,
-                'message': "Ma'lumotlar bazasida xatolik yuz berdi"
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': "Buyurtma topilmadi"
+            }, status=status.HTTP_404_NOT_FOUND)
             
         except Exception as e:
-            # Xatoni logga yozish
-            logger.error(f"Payment error: {str(e)}")
             return Response({
                 'success': False,
-                'message': "Serverda xatolik yuz berdi"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class PaymentListView(generics.ListAPIView):
     serializer_class = PaymentDetailSerializer
@@ -176,49 +238,63 @@ class ContractDetailView(generics.RetrieveAPIView):
             user=self.request.user
         ).select_related('booking', 'booking__car')
 
-class ContractUpdateView(generics.UpdateAPIView):
+class ContractCreateView(generics.CreateAPIView):
     serializer_class = ContractSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAdminUser]
     
-    def get_queryset(self):
-        return Contract.objects.filter(
-            user=self.request.user,
-            status='faol'
-        )
-    
-    def update(self, request, *args, **kwargs):
-        contract = self.get_object()
-        
-        # Faqat bekor qilish yoki yakunlashga ruxsat berish
-        new_status = request.data.get('status')
-        if new_status not in ['yakunlangan', 'bekor_qilingan']:
-            return Response({
-                'success': False,
-                'message': "Noto'g'ri status"
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
+    def create(self, request, *args, **kwargs):
         try:
-            with transaction.atomic():
-                # Shartnoma statusini yangilash
-                contract.status = new_status
-                contract.save()
-                
-                # Buyurtma statusini yangilash
-                if new_status == 'bekor_qilingan':
-                    contract.booking.status = 'rad_etildi'
-                else:
-                    contract.booking.status = 'yakunlangan'
-                contract.booking.save()
-                
+            # Ma'lumotlarni olish
+            booking_id = request.data.get('booking')
+            booking = Booking.objects.get(id=booking_id)
+            
+            # Buyurtma statusini tekshirish
+            if booking.status != 'kutilmoqda':
                 return Response({
-                    'success': True,
-                    'message': f"Shartnoma {contract.get_status_display().lower()}"
-                })
-                
-        except Exception as e:
-            logger.error(f"Contract update error: {str(e)}")
+                    'success': False,
+                    'message': "Buyurtma holati noto'g'ri"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # To'lovni tekshirish
+            payment = Payment.objects.filter(booking=booking, status='kutilmoqda').first()
+            if not payment:
+                return Response({
+                    'success': False,
+                    'message': "To'lov topilmadi yoki yakunlanmagan"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Shartnoma yaratish
+            contract = Contract.objects.create(
+                booking=booking,
+                car=booking.car,
+                user=booking.user,
+                start_date=booking.start_date,
+                end_date=booking.end_date,
+                total_price=payment.amount,
+                status='faol'
+            )
+            
+            # Buyurtma statusini yangilash
+            booking.status = 'qabul_qilindi'
+            booking.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Shartnoma yaratildi',
+                'data': {
+                    'contract_id': contract.id
+                }
+            })
+            
+        except Booking.DoesNotExist:
             return Response({
                 'success': False,
-                'message': "Serverda xatolik yuz berdi"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'message': "Buyurtma topilmadi"
+            }, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
