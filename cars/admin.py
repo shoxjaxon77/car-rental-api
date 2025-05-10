@@ -34,7 +34,7 @@ class CarAdmin(admin.ModelAdmin):
     price_display.short_description = 'Price'
 
     def availability_status(self, obj):
-        available = obj.available_count
+        available = obj.available_count()
         total = obj.total_quantity
         color = 'green' if available == total else 'orange' if available > 0 else 'red'
         return format_html(
