@@ -87,7 +87,7 @@ class BookingCreateView(generics.CreateAPIView):
             
             # Kunlar sonini va umumiy summani hisoblash
             days = (booking.end_date - booking.start_date).days
-            total_price = days * car.daily_price
+            total_price = days * car.price_per_day
             
             return Response({
                 'success': True,
@@ -98,7 +98,7 @@ class BookingCreateView(generics.CreateAPIView):
                     'start_date': start_date,
                     'end_date': end_date,
                     'days': days,
-                    'daily_price': car.daily_price,
+                    'price_per_day': car.price_per_day,
                     'total_price': total_price
                 }
             })
@@ -164,7 +164,7 @@ class PaymentCreateView(generics.CreateAPIView):
             
             # To'lov summasini hisoblash
             days = (booking.end_date - booking.start_date).days
-            total_price = days * booking.car.daily_price
+            total_price = days * booking.car.price_per_day
             
             # To'lovni saqlash
             payment = Payment.objects.create(
