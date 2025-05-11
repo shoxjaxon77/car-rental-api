@@ -94,7 +94,11 @@ class BookingCreateView(generics.CreateAPIView):
                 'message': 'Buyurtma yaratildi',
                 'data': {
                     'booking_id': booking.id,
-                    'car_name': car.name,
+                    'car': {
+                        'id': car.id,
+                        'brand': car.brand.name,
+                        'model': car.model
+                    },
                     'start_date': start_date,
                     'end_date': end_date,
                     'days': days,
