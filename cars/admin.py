@@ -55,6 +55,26 @@ class BookingAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email', 'car__model', 'car__brand__name')
     list_per_page = 20
     ordering = ('-created_at',)
+    
+    def save_model(self, request, obj, form, change):
+        # Agar status o'zgartirilgan bo'lsa va yangi status 'qabul_qilindi' bo'lsa
+        if change and 'status' in form.changed_data and obj.status == 'qabul_qilindi':
+            # Kunlar sonini va umumiy summani hisoblash
+            days = (obj.end_date - obj.start_date).days
+            total_price = days * obj.car.price_per_day
+            
+            # Shartnoma yaratish
+            Contract.objects.create(
+                booking=obj,
+                car=obj.car,
+                user=obj.user,
+                start_date=obj.start_date,
+                end_date=obj.end_date,
+                total_price=total_price,
+                status='faol'
+            )
+        
+        super().save_model(request, obj, form, change)
 
     def booking_info(self, obj):
         return format_html(
