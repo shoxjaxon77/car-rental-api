@@ -15,5 +15,6 @@ PyYAML==6.0.2
 sqlparse==0.5.3
 typing_extensions==4.13.2
 uritemplate==4.1.1
-whitenoise==6.9.0
+whitenoise
+django-cors-headers==6.9.0
 gunicorn==21.2.0
