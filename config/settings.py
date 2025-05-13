@@ -36,7 +36,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Production settings
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['car-rental-api-gyfw.onrender.com', 'localhost', '127.0.0.1']
 
