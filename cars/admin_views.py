@@ -59,16 +59,30 @@ def dashboard(request):
 @user_passes_test(is_staff)
 def booking_list(request):
     status = request.GET.get('status', '')
+    search_query = request.GET.get('search', '')
+    
+    bookings = Booking.objects.all()
+    
+    # Apply status filter
     if status:
-        bookings = Booking.objects.filter(status=status)
-    else:
-        bookings = Booking.objects.all()
+        bookings = bookings.filter(status=status)
+    
+    # Apply search
+    if search_query:
+        bookings = bookings.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__phone__icontains=search_query) |
+            Q(car__name__icontains=search_query) |
+            Q(car__number__icontains=search_query)
+        )
     
     bookings = bookings.select_related('user', 'car').order_by('-created_at')
     
     context = {
         'bookings': bookings,
         'current_status': status,
+        'search_query': search_query
     }
     return render(request, 'cars/admin/booking_list.html', context)
 
@@ -107,16 +121,31 @@ def booking_action(request, booking_id, action):
 @user_passes_test(is_staff)
 def contract_list(request):
     status = request.GET.get('status', '')
-    if status:
-        contracts = Contract.objects.filter(status=status)
-    else:
-        contracts = Contract.objects.all()
+    search_query = request.GET.get('search', '')
     
-    contracts = contracts.select_related('user', 'car').order_by('-created_at')
+    contracts = Contract.objects.all()
+    
+    # Apply status filter
+    if status:
+        contracts = contracts.filter(status=status)
+    
+    # Apply search
+    if search_query:
+        contracts = contracts.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__phone__icontains=search_query) |
+            Q(car__name__icontains=search_query) |
+            Q(car__number__icontains=search_query) |
+            Q(booking__id__icontains=search_query)
+        )
+    
+    contracts = contracts.select_related('user', 'car', 'booking').order_by('-created_at')
     
     context = {
         'contracts': contracts,
         'current_status': status,
+        'search_query': search_query
     }
     return render(request, 'cars/admin/contract_list.html', context)
 

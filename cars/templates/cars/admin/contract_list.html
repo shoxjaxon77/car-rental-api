@@ -5,6 +5,20 @@
 {% block header %}Shartnomalar{% endblock %}
 
 {% block content %}
+<!-- Search -->
+<div class="mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Qidirish..." value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
 <!-- Filter -->
 <div class="mb-4">
     <div class="btn-group" role="group">
