@@ -11,5 +11,5 @@ python manage.py collectstatic --no-input
 # Run migrations
 python manage.py migrate
 
-# Load initial data (optional, comment out if you don't want to run this in production)
-# python populate_db.py
+# Load initial data
+python populate_db.py
