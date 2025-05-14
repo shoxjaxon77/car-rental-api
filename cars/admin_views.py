@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Max
 from django.utils import timezone
 from .models import Booking, Car, Contract, Payment, Brand
 from users.models import CustomUser
