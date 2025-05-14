@@ -67,11 +67,12 @@
                     <tr>
                         <th>ID</th>
                         <th>Rasm</th>
-                        <th>Brand</th>
-                        <th>Model</th>
+                        <th>Avtomobil</th>
                         <th>Yili</th>
+                        <th>O'rindiqlar</th>
+                        <th>Soni</th>
                         <th>Narxi</th>
-                        <th>Status</th>
+                        <th>Holati</th>
                         <th>Amallar</th>
                     </tr>
                 </thead>
@@ -97,9 +98,11 @@
                             </div>
                         </td>
                         <td class="align-middle">{{ car.year }}</td>
+                        <td class="align-middle">{{ car.seats }}</td>
+                        <td class="align-middle">{{ car.total_quantity }}</td>
                         <td class="align-middle">
                             <div class="d-flex flex-column">
-                                <span class="fw-medium">${{ car.price_per_day }}</span>
+                                <span class="fw-medium">{{ car.price_per_day }} so'm</span>
                                 <small class="text-muted">kunlik</small>
                             </div>
                         </td>

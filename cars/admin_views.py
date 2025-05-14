@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.utils import timezone
-from .models import Booking, Car, Contract, Payment
+from .models import Booking, Car, Contract, Payment, Brand
 from users.models import CustomUser
 
 def admin_login(request):
@@ -158,9 +158,14 @@ def car_list(request):
 def car_create(request):
     if request.method == 'POST':
         car = Car()
-        car.brand = request.POST.get('brand')
+        brand_name = request.POST.get('brand')
+        brand, created = Brand.objects.get_or_create(name=brand_name)
+        
+        car.brand = brand
         car.model = request.POST.get('model')
         car.year = request.POST.get('year')
+        car.seats = request.POST.get('seats')
+        car.total_quantity = request.POST.get('total_quantity')
         car.price_per_day = request.POST.get('price_per_day')
         car.color = request.POST.get('color')
         car.transmission = request.POST.get('transmission')
@@ -180,9 +185,14 @@ def car_create(request):
 def car_edit(request, car_id):
     car = get_object_or_404(Car, id=car_id)
     if request.method == 'POST':
-        car.brand = request.POST.get('brand')
+        brand_name = request.POST.get('brand')
+        brand, created = Brand.objects.get_or_create(name=brand_name)
+        
+        car.brand = brand
         car.model = request.POST.get('model')
         car.year = request.POST.get('year')
+        car.seats = request.POST.get('seats')
+        car.total_quantity = request.POST.get('total_quantity')
         car.price_per_day = request.POST.get('price_per_day')
         car.color = request.POST.get('color')
         car.transmission = request.POST.get('transmission')

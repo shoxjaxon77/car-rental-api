@@ -33,10 +33,24 @@
 
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <div class="form-floating">
-                        <input type="number" class="form-control" id="year" name="year" 
-                               value="{{ car.year|default:'' }}" required placeholder="Yili">
-                        <label for="year">Yili</label>
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="year" name="year" value="{{ car.year|default:'' }}" required>
+                        <label for="year">Ishlab chiqarilgan yili</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="seats" name="seats" value="{{ car.seats|default:'' }}" required>
+                        <label for="seats">O'rindiqlar soni</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="total_quantity" name="total_quantity" value="{{ car.total_quantity|default:'' }}" required>
+                        <label for="total_quantity">Umumiy soni</label>
                     </div>
                 </div>
                 <div class="col-md-6">

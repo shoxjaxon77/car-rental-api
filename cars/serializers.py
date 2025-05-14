@@ -61,13 +61,26 @@ class BookingCreateSerializer(serializers.ModelSerializer):
 class BookingListSerializer(serializers.ModelSerializer):
     car = CarListSerializer(read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    formatted_start_date = serializers.SerializerMethodField()
+    formatted_end_date = serializers.SerializerMethodField()
+    duration_days = serializers.SerializerMethodField()
 
     class Meta:
         model = Booking
         fields = [
-            'id', 'car', 'start_date', 'end_date', 'status',
-            'status_display', 'total_price', 'created_at'
+            'id', 'car', 'start_date', 'end_date', 'formatted_start_date',
+            'formatted_end_date', 'duration_days', 'status', 'status_display',
+            'total_price', 'created_at'
         ]
+
+    def get_formatted_start_date(self, obj):
+        return obj.start_date.strftime('%d-%m-%Y')
+
+    def get_formatted_end_date(self, obj):
+        return obj.end_date.strftime('%d-%m-%Y')
+
+    def get_duration_days(self, obj):
+        return (obj.end_date - obj.start_date).days
 
 class PaymentCreateSerializer(serializers.ModelSerializer):
     class Meta:
