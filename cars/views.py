@@ -10,12 +10,14 @@ from django.http import FileResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Brand, Car, Booking, Payment, Contract
+from .utils import generate_contract_pdf
 from .serializers import (
     BrandSerializer, CarListSerializer, CarDetailSerializer,
     BookingCreateSerializer, BookingListSerializer,
     PaymentCreateSerializer, PaymentDetailSerializer,
     ContractSerializer
 )
+from .utils import generate_contract_pdf
 
 class BrandListView(generics.ListAPIView):
     queryset = Brand.objects.all()
@@ -229,6 +231,31 @@ class PaymentDetailView(generics.RetrieveAPIView):
         return Payment.objects.filter(
             user=self.request.user
         ).select_related('booking', 'booking__car')
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_contract_pdf(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    
+    # Faqat shartnoma egasi yoki admin yuklab olishi mumkin
+    if not (request.user.is_staff or request.user == contract.user):
+        return Response({'error': 'Ruxsat berilmagan'}, status=403)
+    
+    # Faqat qabul qilingan arizalar uchun shartnoma yuklanadi
+    if contract.booking.status != 'qabul_qilindi':
+        return Response({'error': 'Shartnoma mavjud emas'}, status=404)
+    
+    buffer = generate_contract_pdf(contract)
+    
+    filename = f'shartnoma_{contract.id}.pdf'
+    response = FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=filename,
+        content_type='application/pdf'
+    )
+    
+    return response
 
 class ContractListView(generics.ListAPIView):
     serializer_class = ContractSerializer

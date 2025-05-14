@@ -140,18 +140,117 @@ def contract_action(request, contract_id, action):
 @login_required
 @user_passes_test(is_staff)
 def customer_list(request):
+    # Get filters from request
+    search_query = request.GET.get('search', '')
+    status = request.GET.get('status', '')
+    sort = request.GET.get('sort', '-created_at')
+    
+    # Base queryset
     customers = CustomUser.objects.filter(is_staff=False)
-    return render(request, 'cars/admin/customer_list.html', {
-        'customers': customers
-    })
+    
+    # Apply search
+    if search_query:
+        customers = customers.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(phone__icontains=search_query)
+        )
+    
+    # Apply status filter
+    if status == 'active':
+        customers = customers.filter(is_active=True)
+    elif status == 'inactive':
+        customers = customers.filter(is_active=False)
+    
+    # Annotate with bookings count
+    customers = customers.annotate(
+        bookings_count=Count('bookings'),
+        last_booking_date=Max('bookings__created_at')
+    )
+    
+    # Apply sorting
+    customers = customers.order_by(sort)
+    
+    # Get statistics
+    total_customers = customers.count()
+    active_customers = customers.filter(is_active=True).count()
+    today_bookings = Booking.objects.filter(
+        user__in=customers,
+        created_at__date=timezone.now().date()
+    ).count()
+    
+    context = {
+        'customers': customers,
+        'total_customers': total_customers,
+        'active_customers': active_customers,
+        'today_bookings': today_bookings,
+        'search_query': search_query,
+        'selected_status': status,
+        'selected_sort': sort
+    }
+    
+    return render(request, 'cars/admin/customer_list.html', context)
 
 @login_required
 @user_passes_test(is_staff)
 def car_list(request):
-    cars = Car.objects.all().order_by('-id')
-    return render(request, 'cars/admin/car_list.html', {
-        'cars': cars
-    })
+    # Get filters from request
+    search_query = request.GET.get('search', '')
+    brand = request.GET.get('brand', '')
+    transmission = request.GET.get('transmission', '')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    
+    # Base queryset
+    cars = Car.objects.select_related('brand')
+    
+    # Apply search
+    if search_query:
+        cars = cars.filter(
+            Q(brand__name__icontains=search_query) |
+            Q(model__icontains=search_query) |
+            Q(color__icontains=search_query)
+        )
+    
+    # Apply filters
+    if brand:
+        cars = cars.filter(brand__name=brand)
+    if transmission:
+        cars = cars.filter(transmission=transmission)
+    
+    min_price = request.GET.get('min_price')
+    if min_price:
+        cars = cars.filter(price_per_day__gte=min_price)
+    
+    max_price = request.GET.get('max_price')
+    if max_price:
+        cars = cars.filter(price_per_day__lte=max_price)
+    
+    # Statistika
+    total_cars = cars.count()
+    available_cars = sum(1 for car in cars if car.is_available())
+    total_bookings = Booking.objects.filter(car__in=cars).count()
+    active_contracts = Contract.objects.filter(car__in=cars, status='faol').count()
+    
+    # Brendlar ro'yxati (filter uchun)
+    brands = Brand.objects.all()
+    
+    context = {
+        'cars': cars,
+        'brands': brands,
+        'total_cars': total_cars,
+        'available_cars': available_cars,
+        'total_bookings': total_bookings,
+        'active_contracts': active_contracts,
+        'search_query': search_query,
+        'selected_brand': brand,
+        'selected_transmission': transmission,
+        'min_price': min_price,
+        'max_price': max_price
+    }
+    
+    return render(request, 'cars/admin/car_list.html', context)
 
 @login_required
 @user_passes_test(is_staff)

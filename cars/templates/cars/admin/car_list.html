@@ -7,14 +7,14 @@
 
 {% block content %}
 <!-- Stats cards -->
-<div class="row mb-4">
+<div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Jami avtomobillar</h6>
-                        <h3 class="mb-0" id="totalCars">{{ cars.count }}</h3>
+                        <h3 class="mb-0">{{ total_cars }}</h3>
                     </div>
                     <div class="bg-primary bg-opacity-10 p-3 rounded">
                         <i class="bi bi-car-front text-primary" style="font-size: 1.5rem;"></i>
@@ -29,7 +29,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-muted mb-2">Mavjud</h6>
-                        <h3 class="mb-0" id="availableCars">{{ cars|dictsortreversed:"is_available"|first }}</h3>
+                        <h3 class="mb-0">{{ available_cars }}</h3>
                     </div>
                     <div class="bg-success bg-opacity-10 p-3 rounded">
                         <i class="bi bi-check-circle text-success" style="font-size: 1.5rem;"></i>
@@ -38,23 +38,108 @@
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Jami buyurtmalar</h6>
+                        <h3 class="mb-0">{{ total_bookings }}</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-bookmark text-info" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Faol shartnomalar</h6>
+                        <h3 class="mb-0">{{ active_contracts }}</h3>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-file-text text-warning" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Actions -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex gap-2">
-        <a href="{% url 'cars:admin_car_create' %}" class="btn btn-primary d-flex align-items-center gap-2">
-            <i class="bi bi-plus-lg"></i>
-            <span>Yangi avtomobil</span>
-        </a>
-    </div>
-    <div class="d-flex align-items-center gap-3">
-        <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-muted"></i>
-            </span>
-            <input type="text" class="form-control border-start-0" placeholder="Qidirish..." id="searchInput">
-        </div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <!-- Search -->
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ search_query }}" placeholder="Qidirish...">
+                    <label for="search">Qidirish</label>
+                </div>
+            </div>
+            
+            <!-- Brand filter -->
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <select class="form-select" id="brand" name="brand">
+                        <option value="">Barchasi</option>
+                        {% for brand in brands %}
+                        <option value="{{ brand.name }}" {% if selected_brand == brand.name %}selected{% endif %}>
+                            {{ brand.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <label for="brand">Brend</label>
+                </div>
+            </div>
+            
+            <!-- Transmission filter -->
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <select class="form-select" id="transmission" name="transmission">
+                        <option value="">Barchasi</option>
+                        <option value="avtomat" {% if selected_transmission == 'avtomat' %}selected{% endif %}>Avtomat</option>
+                        <option value="mexanik" {% if selected_transmission == 'mexanik' %}selected{% endif %}>Mexanik</option>
+                    </select>
+                    <label for="transmission">Transmissiya</label>
+                </div>
+            </div>
+            
+            <!-- Price range -->
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="min_price" name="min_price" 
+                           value="{{ min_price }}" placeholder="Minimal narx">
+                    <label for="min_price">Minimal narx</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="max_price" name="max_price" 
+                           value="{{ max_price }}" placeholder="Maksimal narx">
+                    <label for="max_price">Maksimal narx</label>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="col-md-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Qidirish
+                </button>
+                <a href="{% url 'cars:admin_car_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Tozalash
+                </a>
+                <a href="{% url 'cars:admin_car_create' %}" class="btn btn-success ms-auto">
+                    <i class="bi bi-plus-lg"></i> Yangi avtomobil
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -62,59 +147,62 @@
 <div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Rasm</th>
-                        <th>Avtomobil</th>
-                        <th>Yili</th>
+                        <th>Brend</th>
+                        <th>Model</th>
+                        <th>Yil</th>
                         <th>O'rindiqlar</th>
-                        <th>Soni</th>
-                        <th>Narxi</th>
-                        <th>Holati</th>
+                        <th>Transmissiya</th>
+                        <th>Rangi</th>
+                        <th>Narx</th>
+                        <th>Umumiy soni</th>
+                        <th>Mavjud</th>
+                        <th>Holat</th>
                         <th>Amallar</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for car in cars %}
                     <tr>
-                        <td class="align-middle">{{ car.id }}</td>
-                        <td class="align-middle">
-                            {% if car.image %}
-                                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" 
-                                     class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                        <td>{{ car.id }}</td>
+                        <td>
+                            {% if car.photo %}
+                            <img src="{{ car.photo.url }}" alt="{{ car.model }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
                             {% else %}
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
-                                     style="width: 50px; height: 50px;">
-                                    <i class="bi bi-image text-muted"></i>
-                                </div>
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-car-front text-muted"></i>
+                            </div>
                             {% endif %}
                         </td>
-                        <td class="align-middle">
-                            <div class="d-flex flex-column">
-                                <span class="fw-medium">{{ car.brand }}</span>
-                                <small class="text-muted">{{ car.model }}</small>
-                            </div>
+                        <td>{{ car.brand.name }}</td>
+                        <td>{{ car.model }}</td>
+                        <td>{{ car.year }}</td>
+                        <td>{{ car.seats }}</td>
+                        <td>
+                            {% if car.transmission == 'avtomat' %}
+                            <span class="badge bg-info">Avtomat</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Mexanik</span>
+                            {% endif %}
                         </td>
-                        <td class="align-middle">{{ car.year }}</td>
-                        <td class="align-middle">{{ car.seats }}</td>
-                        <td class="align-middle">{{ car.total_quantity }}</td>
-                        <td class="align-middle">
-                            <div class="d-flex flex-column">
-                                <span class="fw-medium">{{ car.price_per_day }} so'm</span>
-                                <small class="text-muted">kunlik</small>
-                            </div>
-                        </td>
-                        <td class="align-middle">
+                        <td>{{ car.color }}</td>
+                        <td>{{ car.price_per_day|floatformat:0 }} so'm</td>
+                        <td>{{ car.total_quantity }}</td>
+                        <td>{{ car.available_count }}</td>
+                        <td>
                             {% if car.is_available %}
-                                <span class="badge bg-success-subtle text-success">Mavjud</span>
+                            <span class="badge bg-success">Mavjud</span>
                             {% else %}
-                                <span class="badge bg-danger-subtle text-danger">Band</span>
+                            <span class="badge bg-warning">Band</span>
                             {% endif %}
                         </td>
-                        <td class="align-middle">
+                        <td>
                             <div class="d-flex gap-2">
+                                <a href="{% url 'cars:admin_car_edit' car.id %}" class="btn btn-sm btn-primary" title="Tahrirlash">
                                 <a href="{% url 'cars:admin_car_edit' car.id %}" 
                                    class="btn btn-sm btn-light d-flex align-items-center gap-2" 
                                    title="Tahrirlash">

@@ -5,6 +5,109 @@
 {% block header %}Mijozlar{% endblock %}
 
 {% block content %}
+<!-- Stats cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Jami mijozlar</h6>
+                        <h3 class="mb-0">{{ total_customers }}</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Faol mijozlar</h6>
+                        <h3 class="mb-0">{{ active_customers }}</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-person-check text-success" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Bugungi buyurtmalar</h6>
+                        <h3 class="mb-0">{{ today_bookings }}</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-calendar-check text-info" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <!-- Search -->
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ search_query }}" placeholder="Qidirish...">
+                    <label for="search">Qidirish (Ism, telefon, email)</label>
+                </div>
+            </div>
+            
+            <!-- Status filter -->
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Barchasi</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Faol</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Nofaol</option>
+                    </select>
+                    <label for="status">Holat</label>
+                </div>
+            </div>
+            
+            <!-- Sort by -->
+            <div class="col-md-3">
+                <div class="form-floating">
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="-created_at">Oxirgi qo'shilganlar</option>
+                        <option value="created_at">Birinchi qo'shilganlar</option>
+                        <option value="-bookings_count">Ko'p buyurtmalar</option>
+                        <option value="bookings_count">Kam buyurtmalar</option>
+                    </select>
+                    <label for="sort">Saralash</label>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="col-md-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Qidirish
+                </button>
+                <a href="{% url 'cars:admin_customer_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Tozalash
+                </a>
+                <a href="{% url 'cars:admin_customer_create' %}" class="btn btn-success ms-auto">
+                    <i class="bi bi-plus-lg"></i> Yangi mijoz
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Mijozlar jadvali -->
 <div class="card">
     <div class="card-body">
