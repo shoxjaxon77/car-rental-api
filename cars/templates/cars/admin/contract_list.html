@@ -8,18 +8,18 @@
 <!-- Filter -->
 <div class="mb-4">
     <div class="btn-group" role="group">
-        <a href="{% url 'admin_contract_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
+        <a href="{% url 'cars:admin_contract_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
             Hammasi
         </a>
-        <a href="{% url 'admin_contract_list' %}?status=faol" 
+        <a href="{% url 'cars:admin_contract_list' %}?status=faol" 
            class="btn btn-outline-success {% if current_status == 'faol' %}active{% endif %}">
             Faol
         </a>
-        <a href="{% url 'admin_contract_list' %}?status=yakunlangan" 
+        <a href="{% url 'cars:admin_contract_list' %}?status=yakunlangan" 
            class="btn btn-outline-info {% if current_status == 'yakunlangan' %}active{% endif %}">
             Yakunlangan
         </a>
-        <a href="{% url 'admin_contract_list' %}?status=bekor_qilingan" 
+        <a href="{% url 'cars:admin_contract_list' %}?status=bekor_qilingan" 
            class="btn btn-outline-danger {% if current_status == 'bekor_qilingan' %}active{% endif %}">
             Bekor qilingan
         </a>
@@ -68,11 +68,11 @@
                         <td>
                             {% if contract.status == 'faol' %}
                                 <div class="btn-group">
-                                    <a href="{% url 'admin_contract_action' contract.id 'complete' %}" 
+                                    <a href="{% url 'cars:admin_contract_action' contract.id 'complete' %}" 
                                        class="btn btn-sm btn-info" title="Yakunlash">
                                         <i class="bi bi-check-circle"></i>
                                     </a>
-                                    <a href="{% url 'admin_contract_action' contract.id 'cancel' %}" 
+                                    <a href="{% url 'cars:admin_contract_action' contract.id 'cancel' %}" 
                                        class="btn btn-sm btn-danger" title="Bekor qilish">
                                         <i class="bi bi-x-circle"></i>
                                     </a>

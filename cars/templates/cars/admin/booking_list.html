@@ -8,18 +8,18 @@
 <!-- Filter -->
 <div class="mb-4">
     <div class="btn-group" role="group">
-        <a href="{% url 'admin_booking_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
+        <a href="{% url 'cars:admin_booking_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
             Hammasi
         </a>
-        <a href="{% url 'admin_booking_list' %}?status=kutilmoqda" 
+        <a href="{% url 'cars:admin_booking_list' %}?status=kutilmoqda" 
            class="btn btn-outline-warning {% if current_status == 'kutilmoqda' %}active{% endif %}">
             Kutilmoqda
         </a>
-        <a href="{% url 'admin_booking_list' %}?status=qabul_qilindi" 
+        <a href="{% url 'cars:admin_booking_list' %}?status=qabul_qilindi" 
            class="btn btn-outline-success {% if current_status == 'qabul_qilindi' %}active{% endif %}">
             Qabul qilingan
         </a>
-        <a href="{% url 'admin_booking_list' %}?status=rad_etildi" 
+        <a href="{% url 'cars:admin_booking_list' %}?status=rad_etildi" 
            class="btn btn-outline-danger {% if current_status == 'rad_etildi' %}active{% endif %}">
             Rad etilgan
         </a>
@@ -67,11 +67,11 @@
                         <td>
                             {% if booking.status == 'kutilmoqda' %}
                                 <div class="btn-group">
-                                    <a href="{% url 'admin_booking_action' booking.id 'accept' %}" 
+                                    <a href="{% url 'cars:admin_booking_action' booking.id 'accept' %}" 
                                        class="btn btn-sm btn-success" title="Qabul qilish">
                                         <i class="bi bi-check-lg"></i>
                                     </a>
-                                    <a href="{% url 'admin_booking_action' booking.id 'reject' %}" 
+                                    <a href="{% url 'cars:admin_booking_action' booking.id 'reject' %}" 
                                        class="btn btn-sm btn-danger" title="Rad etish">
                                         <i class="bi bi-x-lg"></i>
                                     </a>

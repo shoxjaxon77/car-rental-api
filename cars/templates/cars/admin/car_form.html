@@ -1,0 +1,114 @@
+{% extends 'cars/admin/base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}{% if car %}Avtomobilni tahrirlash{% else %}Yangi avtomobil{% endif %} - Admin Panel{% endblock %}
+
+{% block header %}{% if car %}Avtomobilni tahrirlash{% else %}Yangi avtomobil{% endif %}{% endblock %}
+{% block subtitle %}{% if car %}Mavjud avtomobil ma'lumotlarini yangilash{% else %}Yangi avtomobil qo'shish{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="brand" name="brand" 
+                               value="{{ car.brand|default:'' }}" required placeholder="Brand">
+                        <label for="brand">Brand</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="model" name="model" 
+                               value="{{ car.model|default:'' }}" required placeholder="Model">
+                        <label for="model">Model</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="number" class="form-control" id="year" name="year" 
+                               value="{{ car.year|default:'' }}" required placeholder="Yili">
+                        <label for="year">Yili</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="number" class="form-control" id="price_per_day" name="price_per_day" 
+                               value="{{ car.price_per_day|default:'' }}" required placeholder="Kunlik narxi ($)">
+                        <label for="price_per_day">Kunlik narxi ($)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="color" name="color" 
+                               value="{{ car.color|default:'' }}" required placeholder="Rangi">
+                        <label for="color">Rangi</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select class="form-select" id="transmission" name="transmission" required>
+                            <option value="automatic" {% if car.transmission == 'automatic' %}selected{% endif %}>Automatic</option>
+                            <option value="manual" {% if car.transmission == 'manual' %}selected{% endif %}>Manual</option>
+                        </select>
+                        <label for="transmission">Transmission</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-4">
+                <textarea class="form-control" id="description" name="description" 
+                          style="height: 100px" placeholder="Tavsif">{{ car.description|default:'' }}</textarea>
+                <label for="description">Tavsif</label>
+            </div>
+
+            <div class="mb-4">
+                <label for="image" class="form-label">Rasm</label>
+                {% if car.image %}
+                    <div class="mb-3">
+                        <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" 
+                             class="rounded" style="max-width: 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                {% endif %}
+                <input type="file" class="form-control" id="image" name="image" 
+                       accept="image/*" {% if not car %}required{% endif %}>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_available" name="is_available" 
+                           role="switch" {% if car.is_available %}checked{% endif %}>
+                    <label class="form-check-label" for="is_available">
+                        Mavjud
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-between">
+                <a href="{% url 'cars:admin_car_list' %}" 
+                   class="btn btn-light d-flex align-items-center gap-2">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Ortga</span>
+                </a>
+                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                    <i class="bi bi-save"></i>
+                    <span>Saqlash</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'cars/admin/base.html' %}
+
+{% block title %}Avtomobillar - Admin Panel{% endblock %}
+
+{% block header %}Avtomobillar{% endblock %}
+{% block subtitle %}Barcha avtomobillarni boshqarish{% endblock %}
+
+{% block content %}
+<!-- Stats cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Jami avtomobillar</h6>
+                        <h3 class="mb-0" id="totalCars">{{ cars.count }}</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-car-front text-primary" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Mavjud</h6>
+                        <h3 class="mb-0" id="availableCars">{{ cars|dictsortreversed:"is_available"|first }}</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-check-circle text-success" style="font-size: 1.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex gap-2">
+        <a href="{% url 'cars:admin_car_create' %}" class="btn btn-primary d-flex align-items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>Yangi avtomobil</span>
+        </a>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" placeholder="Qidirish..." id="searchInput">
+        </div>
+    </div>
+</div>
+
+<!-- Avtomobillar jadvali -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Rasm</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Yili</th>
+                        <th>Narxi</th>
+                        <th>Status</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for car in cars %}
+                    <tr>
+                        <td class="align-middle">{{ car.id }}</td>
+                        <td class="align-middle">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" 
+                                     class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="bi bi-image text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            <div class="d-flex flex-column">
+                                <span class="fw-medium">{{ car.brand }}</span>
+                                <small class="text-muted">{{ car.model }}</small>
+                            </div>
+                        </td>
+                        <td class="align-middle">{{ car.year }}</td>
+                        <td class="align-middle">
+                            <div class="d-flex flex-column">
+                                <span class="fw-medium">${{ car.price_per_day }}</span>
+                                <small class="text-muted">kunlik</small>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            {% if car.is_available %}
+                                <span class="badge bg-success-subtle text-success">Mavjud</span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger">Band</span>
+                            {% endif %}
+                        </td>
+                        <td class="align-middle">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'cars:admin_car_edit' car.id %}" 
+                                   class="btn btn-sm btn-light d-flex align-items-center gap-2" 
+                                   title="Tahrirlash">
+                                    <i class="bi bi-pencil"></i>
+                                    <span>Tahrirlash</span>
+                                </a>
+                                <a href="{% url 'cars:admin_car_delete' car.id %}" 
+                                   class="btn btn-sm btn-danger-subtle text-danger d-flex align-items-center gap-2" 
+                                   onclick="return confirm('Haqiqatan ham bu avtomobilni o\'chirmoqchimisiz?')" 
+                                   title="O'chirish">
+                                    <i class="bi bi-trash"></i>
+                                    <span>O'chirish</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Avtomobillar topilmadi</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

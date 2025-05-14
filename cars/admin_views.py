@@ -10,7 +10,7 @@ from users.models import CustomUser
 
 def admin_login(request):
     if request.user.is_authenticated and request.user.is_staff:
-        return redirect('admin_dashboard')
+        return redirect('cars:admin_dashboard')
         
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -18,7 +18,7 @@ def admin_login(request):
             user = form.get_user()
             if user.is_staff:
                 login(request, user)
-                return redirect('admin_dashboard')
+                return redirect('cars:admin_dashboard')
             else:
                 messages.error(request, 'Sizda admin huquqlari mavjud emas')
     else:
@@ -29,7 +29,7 @@ def admin_login(request):
 @login_required
 def admin_logout(request):
     logout(request)
-    return redirect('admin_login')
+    return redirect('cars:admin_login')
 
 def is_staff(user):
     return user.is_staff
@@ -101,7 +101,7 @@ def booking_action(request, booking_id, action):
         booking.save()
         messages.success(request, 'Ariza rad etildi')
     
-    return redirect('admin_booking_list')
+    return redirect('cars:admin_booking_list')
 
 @login_required
 @user_passes_test(is_staff)
@@ -135,17 +135,72 @@ def contract_action(request, contract_id, action):
         contract.save()
         messages.success(request, 'Shartnoma bekor qilindi')
     
-    return redirect('admin_contract_list')
+    return redirect('cars:admin_contract_list')
 
 @login_required
 @user_passes_test(is_staff)
 def customer_list(request):
-    customers = CustomUser.objects.filter(is_staff=False).annotate(
-        total_bookings=Count('bookings'),
-        active_contracts=Count('contracts', filter=Q(contracts__status='faol'))
-    ).order_by('-date_joined')
-    
-    context = {
+    customers = CustomUser.objects.filter(is_staff=False)
+    return render(request, 'cars/admin/customer_list.html', {
         'customers': customers
-    }
-    return render(request, 'cars/admin/customer_list.html', context)
+    })
+
+@login_required
+@user_passes_test(is_staff)
+def car_list(request):
+    cars = Car.objects.all().order_by('-id')
+    return render(request, 'cars/admin/car_list.html', {
+        'cars': cars
+    })
+
+@login_required
+@user_passes_test(is_staff)
+def car_create(request):
+    if request.method == 'POST':
+        car = Car()
+        car.brand = request.POST.get('brand')
+        car.model = request.POST.get('model')
+        car.year = request.POST.get('year')
+        car.price_per_day = request.POST.get('price_per_day')
+        car.color = request.POST.get('color')
+        car.transmission = request.POST.get('transmission')
+        car.description = request.POST.get('description')
+        car.is_available = request.POST.get('is_available') == 'on'
+        
+        if request.FILES.get('image'):
+            car.image = request.FILES['image']
+        
+        car.save()
+        messages.success(request, "Avtomobil muvaffaqiyatli qo'shildi")
+        return redirect('cars:admin_car_list')
+    return render(request, 'cars/admin/car_form.html')
+
+@login_required
+@user_passes_test(is_staff)
+def car_edit(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+    if request.method == 'POST':
+        car.brand = request.POST.get('brand')
+        car.model = request.POST.get('model')
+        car.year = request.POST.get('year')
+        car.price_per_day = request.POST.get('price_per_day')
+        car.color = request.POST.get('color')
+        car.transmission = request.POST.get('transmission')
+        car.description = request.POST.get('description')
+        car.is_available = request.POST.get('is_available') == 'on'
+        
+        if request.FILES.get('image'):
+            car.image = request.FILES['image']
+        
+        car.save()
+        messages.success(request, "Avtomobil muvaffaqiyatli yangilandi")
+        return redirect('cars:admin_car_list')
+    return render(request, 'cars/admin/car_form.html', {'car': car})
+
+@login_required
+@user_passes_test(is_staff)
+def car_delete(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
+    car.delete()
+    messages.success(request, "Avtomobil muvaffaqiyatli o'chirildi")
+    return redirect('cars:admin_car_list')

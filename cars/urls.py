@@ -65,5 +65,10 @@ urlpatterns = [
     path('bookings/<int:booking_id>/<str:action>/', admin_views.booking_action, name='admin_booking_action'),
     path('contracts/', admin_views.contract_list, name='admin_contract_list'),
     path('contracts/<int:contract_id>/<str:action>/', admin_views.contract_action, name='admin_contract_action'),
-    path('customers/', admin_views.customer_list, name='admin_customer_list'),
+    path('admin/customers/', admin_views.customer_list, name='admin_customer_list'),
+    # Car management
+    path('admin/cars/', admin_views.car_list, name='admin_car_list'),
+    path('admin/cars/create/', admin_views.car_create, name='admin_car_create'),
+    path('admin/cars/<int:car_id>/edit/', admin_views.car_edit, name='admin_car_edit'),
+    path('admin/cars/<int:car_id>/delete/', admin_views.car_delete, name='admin_car_delete'),
 ]

@@ -77,10 +77,10 @@
                         </td>
                         <td>
                             {% if booking.status == 'kutilmoqda' %}
-                                <a href="{% url 'admin_booking_action' booking.id 'accept' %}" class="btn btn-sm btn-success">
+                                <a href="{% url 'cars:admin_booking_action' booking.id 'accept' %}" class="btn btn-sm btn-success">
                                     <i class="bi bi-check"></i>
                                 </a>
-                                <a href="{% url 'admin_booking_action' booking.id 'reject' %}" class="btn btn-sm btn-danger">
+                                <a href="{% url 'cars:admin_booking_action' booking.id 'reject' %}" class="btn btn-sm btn-danger">
                                     <i class="bi bi-x"></i>
                                 </a>
                             {% endif %}
