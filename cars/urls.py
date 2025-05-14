@@ -7,6 +7,7 @@ urlpatterns = [
     # Brands (GET)
     # Response: List of all car brands
     # Example: {"id": 1, "name": "Toyota"}
+    path('api/v1/contracts/<int:pk>/download/', views.download_contract_pdf, name='download_contract_pdf'),
     path('api/v1/brands/', views.BrandListView.as_view(), name='brand-list'),
 
     # Cars
