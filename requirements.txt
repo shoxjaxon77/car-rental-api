@@ -47,6 +47,8 @@ django-filter==23.5
 django-heroku==0.3.1
 django-js-asset==2.0.0
 django-livereload-server==0.4
+django-jazzmin==3.0.1
+django-bootstrap5==25.1
 django-multiselectfield==0.1.12
 django-tailwind==3.8.0
 djangorestframework==3.14.0
