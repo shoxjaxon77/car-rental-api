@@ -1,0 +1,95 @@
+{% extends 'cars/admin/base.html' %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Statistika kartlari -->
+    <div class="col-md-3 mb-4">
+        <div class="card border-primary">
+            <div class="card-body">
+                <h5 class="card-title">Jami arizalar</h5>
+                <p class="card-text display-6">{{ total_bookings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-warning">
+            <div class="card-body">
+                <h5 class="card-title">Kutilayotgan arizalar</h5>
+                <p class="card-text display-6">{{ pending_bookings }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-success">
+            <div class="card-body">
+                <h5 class="card-title">Faol shartnomalar</h5>
+                <p class="card-text display-6">{{ active_contracts }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card border-info">
+            <div class="card-body">
+                <h5 class="card-title">Jami mijozlar</h5>
+                <p class="card-text display-6">{{ total_users }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- So'nggi arizalar -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">So'nggi arizalar</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mijoz</th>
+                        <th>Avtomobil</th>
+                        <th>Sana</th>
+                        <th>Holat</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>{{ booking.user.get_full_name }}</td>
+                        <td>{{ booking.car }}</td>
+                        <td>{{ booking.created_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if booking.status == 'kutilmoqda' %}
+                                <span class="badge bg-warning">Kutilmoqda</span>
+                            {% elif booking.status == 'qabul_qilindi' %}
+                                <span class="badge bg-success">Qabul qilindi</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rad etildi</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if booking.status == 'kutilmoqda' %}
+                                <a href="{% url 'admin_booking_action' booking.id 'accept' %}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check"></i>
+                                </a>
+                                <a href="{% url 'admin_booking_action' booking.id 'reject' %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

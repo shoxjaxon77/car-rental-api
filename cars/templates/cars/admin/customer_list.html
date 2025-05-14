@@ -1,0 +1,58 @@
+{% extends 'cars/admin/base.html' %}
+
+{% block title %}Mijozlar - Admin Panel{% endblock %}
+
+{% block header %}Mijozlar{% endblock %}
+
+{% block content %}
+<!-- Mijozlar jadvali -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>F.I.SH</th>
+                        <th>Telefon</th>
+                        <th>Email</th>
+                        <th>Ro'yxatdan o'tgan sana</th>
+                        <th>Statistika</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>{{ customer.id }}</td>
+                        <td>{{ customer.get_full_name }}</td>
+                        <td>{{ customer.phone_number }}</td>
+                        <td>{{ customer.email }}</td>
+                        <td>{{ customer.date_joined|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <div class="d-flex gap-3">
+                                <div>
+                                    <small class="d-block text-muted">Jami arizalar</small>
+                                    <span class="badge bg-primary">{{ customer.total_bookings }}</span>
+                                </div>
+                                <div>
+                                    <small class="d-block text-muted">Faol shartnomalar</small>
+                                    <span class="badge bg-success">{{ customer.active_contracts }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if customer.is_active %}
+                                <span class="badge bg-success">Faol</span>
+                            {% else %}
+                                <span class="badge bg-danger">Bloklangan</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

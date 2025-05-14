@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, admin_views
 
 app_name = 'cars'
 
@@ -56,4 +56,14 @@ urlpatterns = [
     # Request: {"booking": 1}
     # Response: {"success": true, "contract_id": 1}
     path('api/v1/contracts/create/', views.ContractCreateView.as_view(), name='contract-create'),
+
+    # Admin panel URLs
+    path('login/', admin_views.admin_login, name='admin_login'),
+    path('logout/', admin_views.admin_logout, name='admin_logout'),
+    path('dashboard/', admin_views.dashboard, name='admin_dashboard'),
+    path('bookings/', admin_views.booking_list, name='admin_booking_list'),
+    path('bookings/<int:booking_id>/<str:action>/', admin_views.booking_action, name='admin_booking_action'),
+    path('contracts/', admin_views.contract_list, name='admin_contract_list'),
+    path('contracts/<int:contract_id>/<str:action>/', admin_views.contract_action, name='admin_contract_action'),
+    path('customers/', admin_views.customer_list, name='admin_customer_list'),
 ]

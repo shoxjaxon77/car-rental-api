@@ -1,0 +1,89 @@
+{% extends 'cars/admin/base.html' %}
+
+{% block title %}Shartnomalar - Admin Panel{% endblock %}
+
+{% block header %}Shartnomalar{% endblock %}
+
+{% block content %}
+<!-- Filter -->
+<div class="mb-4">
+    <div class="btn-group" role="group">
+        <a href="{% url 'admin_contract_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
+            Hammasi
+        </a>
+        <a href="{% url 'admin_contract_list' %}?status=faol" 
+           class="btn btn-outline-success {% if current_status == 'faol' %}active{% endif %}">
+            Faol
+        </a>
+        <a href="{% url 'admin_contract_list' %}?status=yakunlangan" 
+           class="btn btn-outline-info {% if current_status == 'yakunlangan' %}active{% endif %}">
+            Yakunlangan
+        </a>
+        <a href="{% url 'admin_contract_list' %}?status=bekor_qilingan" 
+           class="btn btn-outline-danger {% if current_status == 'bekor_qilingan' %}active{% endif %}">
+            Bekor qilingan
+        </a>
+    </div>
+</div>
+
+<!-- Shartnomalar jadvali -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mijoz</th>
+                        <th>Avtomobil</th>
+                        <th>Muddat</th>
+                        <th>Umumiy narx</th>
+                        <th>Holat</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contract in contracts %}
+                    <tr>
+                        <td>{{ contract.id }}</td>
+                        <td>
+                            <strong>{{ contract.user.get_full_name }}</strong><br>
+                            <small class="text-muted">{{ contract.user.phone_number }}</small>
+                        </td>
+                        <td>{{ contract.car }}</td>
+                        <td>
+                            {{ contract.start_date|date:"d.m.Y" }} - {{ contract.end_date|date:"d.m.Y" }}<br>
+                            <small class="text-muted">{{ contract.get_duration }} kun</small>
+                        </td>
+                        <td>{{ contract.total_price|floatformat:2 }} so'm</td>
+                        <td>
+                            {% if contract.status == 'faol' %}
+                                <span class="badge bg-success">Faol</span>
+                            {% elif contract.status == 'yakunlangan' %}
+                                <span class="badge bg-info">Yakunlangan</span>
+                            {% else %}
+                                <span class="badge bg-danger">Bekor qilingan</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if contract.status == 'faol' %}
+                                <div class="btn-group">
+                                    <a href="{% url 'admin_contract_action' contract.id 'complete' %}" 
+                                       class="btn btn-sm btn-info" title="Yakunlash">
+                                        <i class="bi bi-check-circle"></i>
+                                    </a>
+                                    <a href="{% url 'admin_contract_action' contract.id 'cancel' %}" 
+                                       class="btn btn-sm btn-danger" title="Bekor qilish">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

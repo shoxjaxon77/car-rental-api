@@ -1,0 +1,88 @@
+{% extends 'cars/admin/base.html' %}
+
+{% block title %}Arizalar - Admin Panel{% endblock %}
+
+{% block header %}Arizalar{% endblock %}
+
+{% block content %}
+<!-- Filter -->
+<div class="mb-4">
+    <div class="btn-group" role="group">
+        <a href="{% url 'admin_booking_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">
+            Hammasi
+        </a>
+        <a href="{% url 'admin_booking_list' %}?status=kutilmoqda" 
+           class="btn btn-outline-warning {% if current_status == 'kutilmoqda' %}active{% endif %}">
+            Kutilmoqda
+        </a>
+        <a href="{% url 'admin_booking_list' %}?status=qabul_qilindi" 
+           class="btn btn-outline-success {% if current_status == 'qabul_qilindi' %}active{% endif %}">
+            Qabul qilingan
+        </a>
+        <a href="{% url 'admin_booking_list' %}?status=rad_etildi" 
+           class="btn btn-outline-danger {% if current_status == 'rad_etildi' %}active{% endif %}">
+            Rad etilgan
+        </a>
+    </div>
+</div>
+
+<!-- Arizalar jadvali -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mijoz</th>
+                        <th>Avtomobil</th>
+                        <th>Boshlanish</th>
+                        <th>Tugash</th>
+                        <th>Umumiy narx</th>
+                        <th>Holat</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.id }}</td>
+                        <td>
+                            <strong>{{ booking.user.get_full_name }}</strong><br>
+                            <small class="text-muted">{{ booking.user.phone_number }}</small>
+                        </td>
+                        <td>{{ booking.car }}</td>
+                        <td>{{ booking.start_date|date:"d.m.Y" }}</td>
+                        <td>{{ booking.end_date|date:"d.m.Y" }}</td>
+                        <td>{{ booking.total_price|floatformat:2 }} so'm</td>
+                        <td>
+                            {% if booking.status == 'kutilmoqda' %}
+                                <span class="badge bg-warning">Kutilmoqda</span>
+                            {% elif booking.status == 'qabul_qilindi' %}
+                                <span class="badge bg-success">Qabul qilindi</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rad etildi</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if booking.status == 'kutilmoqda' %}
+                                <div class="btn-group">
+                                    <a href="{% url 'admin_booking_action' booking.id 'accept' %}" 
+                                       class="btn btn-sm btn-success" title="Qabul qilish">
+                                        <i class="bi bi-check-lg"></i>
+                                    </a>
+                                    <a href="{% url 'admin_booking_action' booking.id 'reject' %}" 
+                                       class="btn btn-sm btn-danger" title="Rad etish">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

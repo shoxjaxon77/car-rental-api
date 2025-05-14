@@ -46,6 +46,9 @@ CORS_ALLOW_METHODS = [
 
 # Security settings
 SECURE_SSL_REDIRECT = True
+LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '/admin/dashboard/'
+LOGOUT_REDIRECT_URL = '/admin/login/'
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 31536000
@@ -63,14 +66,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    
-    # Third party apps
     'rest_framework',
+    'users',
+    'cars',
+    'django_bootstrap5',
+    # Third party apps
     'drf_yasg',
     
     # Local apps
-    'cars',
-    'users',
 ]
 
 # Jazzmin Settings

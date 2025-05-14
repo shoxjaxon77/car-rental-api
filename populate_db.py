@@ -52,38 +52,43 @@ def create_brands():
         brands.append(brand)
     return brands
 
+def create_car_image_path(brand, model):
+    # Generate a unique image filename based on brand and model
+    filename = f"{brand}_{model}.jpg".lower().replace(' ', '_')
+    return f'car_photos/2023/05/{filename}'
+
 def create_cars(brands):
     cars = []
     car_data = [
         # Toyota
         {'brand': 'Toyota', 'models': [
-            ('Camry', 2023, 5, 'Oq', 500000, 3, 'avtomat'),
-            ('Corolla', 2022, 5, 'Qora', 400000, 5, 'avtomat'),
-            ('Land Cruiser', 2023, 7, 'Kumush', 1000000, 2, 'avtomat'),
+            ('Camry', 2023, 5, 'Oq', 600000, 2, 'avtomat', 'Premium biznes sedan, qulaylik va tejamkorlik'),
+            ('Corolla', 2022, 5, 'Qora', 450000, 3, 'avtomat', 'Ishonchli va ixcham shahar sedani'),
+            ('Land Cruiser', 2023, 7, 'Kumush', 1500000, 1, 'avtomat', 'Premium darajadagi hashamatli SUV'),
         ]},
         # Chevrolet
         {'brand': 'Chevrolet', 'models': [
-            ('Malibu', 2023, 5, 'Oq', 450000, 4, 'avtomat'),
-            ('Captiva', 2022, 7, 'Qora', 500000, 3, 'avtomat'),
-            ('Tracker', 2023, 5, 'Qizil', 400000, 5, 'avtomat'),
+            ('Malibu', 2023, 5, 'Oq', 550000, 3, 'avtomat', 'Zamonaviy biznes sedan, yuqori qulaylik'),
+            ('Captiva', 2022, 7, 'Qora', 600000, 2, 'avtomat', 'Keng hajmli oilaviy SUV'),
+            ('Tracker', 2023, 5, 'Qizil', 400000, 4, 'avtomat', 'Ixcham va shahar uchun qulay krossover'),
         ]},
         # Hyundai
         {'brand': 'Hyundai', 'models': [
-            ('Sonata', 2023, 5, 'Kumush', 450000, 4, 'avtomat'),
-            ('Tucson', 2022, 5, 'Ko\'k', 500000, 3, 'avtomat'),
-            ('Santa Fe', 2023, 7, 'Qora', 600000, 2, 'avtomat'),
+            ('Sonata', 2023, 5, 'Kumush', 500000, 3, 'avtomat', 'Zamonaviy biznes sedan, yuqori texnologiyalar'),
+            ('Tucson', 2022, 5, 'Ko\'k', 550000, 2, 'avtomat', 'Stilish va zamonaviy krossover'),
+            ('Santa Fe', 2023, 7, 'Qora', 700000, 2, 'avtomat', 'Premium oilaviy SUV, keng salon'),
         ]},
         # BMW
         {'brand': 'BMW', 'models': [
-            ('X5', 2023, 5, 'Qora', 1200000, 2, 'avtomat'),
-            ('520i', 2022, 5, 'Kumush', 1000000, 3, 'avtomat'),
-            ('X7', 2023, 7, 'Oq', 1500000, 1, 'avtomat'),
+            ('X5', 2023, 5, 'Qora', 1500000, 1, 'avtomat', 'Premium sport SUV, yuqori quvvat'),
+            ('520i', 2022, 5, 'Kumush', 1200000, 2, 'avtomat', 'Premium biznes sedan, German sifati'),
+            ('X7', 2023, 7, 'Oq', 2000000, 1, 'avtomat', 'Flagman hashamatli SUV, maksimal qulaylik'),
         ]},
         # Mercedes-Benz
         {'brand': 'Mercedes-Benz', 'models': [
-            ('E200', 2023, 5, 'Qora', 1200000, 2, 'avtomat'),
-            ('GLE', 2022, 5, 'Kumush', 1300000, 2, 'avtomat'),
-            ('S500', 2023, 5, 'Oq', 2000000, 1, 'avtomat'),
+            ('E200', 2023, 5, 'Qora', 1300000, 2, 'avtomat', 'Premium biznes sedan, yuqori texnologiya'),
+            ('GLE', 2022, 5, 'Kumush', 1600000, 1, 'avtomat', 'Premium hashamatli krossover'),
+            ('S500', 2023, 5, 'Oq', 2500000, 1, 'avtomat', 'Flagman premium sedan, maksimal hashamat'),
         ]},
     ]
     
@@ -99,6 +104,9 @@ def create_cars(brands):
                     'color': model_data[3],
                     'price_per_day': model_data[4],
                     'total_quantity': model_data[5],
+                    'transmission': model_data[6],
+                    'description': model_data[7],
+                    'photo': create_car_image_path(brand.name, model_data[0]),
                     'transmission': model_data[6],
                 }
             )

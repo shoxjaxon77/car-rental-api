@@ -1,0 +1,27 @@
+{% extends 'cars/admin/base.html' %}
+{% load bootstrap5 %}
+
+{% block title %}Kirish - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card mt-5">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Admin Panel</h3>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Kirish
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
